@@ -18,42 +18,42 @@ import java.util.logging.Logger;
 public class MacCallerIdAnnouncer
 {
   private static final Logger logger = Logger.getLogger("MacCallerIdAnnouncer");
-  
+
   public MacCallerIdAnnouncer() {}
-  
+
   public static void main(String[] args)
     throws IOException
   {
     MulticastSocket socket = new MulticastSocket(4446);
     InetAddress group = InetAddress.getByName("230.0.0.1");
     socket.joinGroup(group);
-    
+
     logger.info("Listening...");
-    
+
     DateFormat dateTimeInstance = DateFormat.getDateTimeInstance();
-    
+
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
         MacCallerIdAnnouncer.logger.info("Shutting down MacCallerIdAnnouncer");
       }
     }));
-    
+
 
     for (;;)
     {
       byte[] buf = new byte['Ā'];
       DatagramPacket packet = new DatagramPacket(buf, buf.length);
       socket.receive(packet);
-      
-      String received = new String(packet.getData());
+
+      final String received = new String(packet.getData());
       Thread t1 = new Thread(new Runnable()
       {
         public void run() {
           try {
-            Runtime.getRuntime().exec("say Caller " + val$received);
+            Runtime.getRuntime().exec("say Caller " + received);
           } catch (IOException e) {
             MacCallerIdAnnouncer.logger.severe(e.getMessage()); } } }, "say program");
-      
+
 
 
 
@@ -63,8 +63,8 @@ public class MacCallerIdAnnouncer
       {
         public void run() {
           try {
-            String[] p = { "/usr/local/bin/growlnotify", "-m " + val$received, "-t Inbound Call" };
-            
+            String[] p = { "/usr/local/bin/growlnotify", "-m " + received, "-t Inbound Call" };
+
             Runtime.getRuntime().exec(p);
 
 
@@ -73,7 +73,7 @@ public class MacCallerIdAnnouncer
           {
 
             MacCallerIdAnnouncer.logger.severe(e.getMessage()); } } }, "growl");
-      
+
 
 
       Thread t3 = new Thread(new Runnable()
@@ -81,16 +81,16 @@ public class MacCallerIdAnnouncer
         public void run() {
           try {
             String skypecmd = "/Users/ewan/Applications/skype.sh";
-            
-            MacCallerIdAnnouncer.logger.info("received: " + val$received);
-            String receivedStr = " \"" + val$received + "\"";
+
+            MacCallerIdAnnouncer.logger.info("received: " + received);
+            String receivedStr = " \"" + received + "\"";
             MacCallerIdAnnouncer.logger.info("receivedStr: " + receivedStr);
             String cmd = "/Users/ewan/Applications/skype.sh";
-            String[] p = { cmd, val$received };
+            String[] p = { cmd, received };
             Runtime.getRuntime().exec(p);
           } catch (Exception e) {
             MacCallerIdAnnouncer.logger.severe(e.getMessage()); } } }, "skype.sh");
-      
+
 
 
 

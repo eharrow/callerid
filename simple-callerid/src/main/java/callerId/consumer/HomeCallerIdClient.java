@@ -34,14 +34,10 @@ public class HomeCallerIdClient
 {
   private static final Logger logger = Logger.getLogger(HomeCallerIdClient.class);
   private static final long ONCE_PER_DAY = 86400000L;
-  static SqueezeboxCallerIdClient sqClient;
-  
+
   public static void main(String[] args) {
     try {
       logger.info("Started");
-      sqClient = new SqueezeboxCallerIdClient();
-      sqClient.setSlimserverIpAddress("192.168.0.4");
-      sqClient.setSlimserverIpPort(9090);
       try {
         tivoClient = new TivoCallerIdClient();
       } catch (Exception e) {
@@ -61,19 +57,19 @@ public class HomeCallerIdClient
       logger.error(e);
     }
   }
-  
+
   static CallerIdClient tivoClient;
   static MulticastBroadcaster multicastClient;
   static ShellScriptClient shellScriptClient;
   public HomeCallerIdClient() { Timer timer = new Timer("ClearCount");
     timer.scheduleAtFixedRate(clearCount(), getTomorrowMorning1am(), 86400000L);
   }
-  
+
   private Date getTomorrowMorning1am() {
     Calendar tomorrow = new GregorianCalendar();
     tomorrow.add(5, 1);
     Calendar result = new GregorianCalendar(tomorrow.get(1), tomorrow.get(2), tomorrow.get(5), 1, 0);
-    
+
 
 
 
@@ -81,7 +77,7 @@ public class HomeCallerIdClient
 
     return result.getTime();
   }
-  
+
   private TimerTask clearCount() {
     TimerTask timerTask = new TimerTask()
     {
@@ -91,44 +87,37 @@ public class HomeCallerIdClient
         instance.clearCounter();
         HomeCallerIdClient.logger.info("Clearing callerId count");
       }
-      
+
     };
     return timerTask;
   }
-  
+
   protected void onRing(String callerId)
   {
     logger.debug("onRing callerId: " + callerId);
     String tmpMsg = null;
     String caller = lookup(callerId);
-    
+
     if ((caller != null) && (!caller.equals(""))) {
       CallerCounter instance = CallerCounter.getInstance();
       int count = instance.update(caller);
       StringBuffer sb = new StringBuffer().append(caller);
-      
+
       if (count > 1) {
         sb.append(" ").append(count).append(" times today");
       }
-      
+
       tmpMsg = sb.toString();
     }
-    
+
     final String msg = tmpMsg;
-    
-    Thread t1 = new Thread(new Runnable()
-    {
-
-      public void run() { HomeCallerIdClient.sqClient.onRing(msg); } }, "squeezebox");
-    
-
 
     Thread t2 = new Thread(new Runnable()
     {
       public void run() {
         if (HomeCallerIdClient.tivoClient != null)
           HomeCallerIdClient.tivoClient.onRing(msg); } }, "tivo");
-    
+
 
 
 
@@ -136,17 +125,16 @@ public class HomeCallerIdClient
     {
 
       public void run() { HomeCallerIdClient.multicastClient.onRing(msg); } }, "multicast");
-    
+
 
 
     Thread t4 = new Thread(new Runnable()
     {
 
       public void run() { HomeCallerIdClient.shellScriptClient.onRing(msg); } }, "shellScript");
-    
 
 
-    t1.start();
+
     t2.start();
     t3.start();
     t4.start();
