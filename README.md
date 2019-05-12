@@ -10,3 +10,5 @@ Sometime later and I can't remember why I had a eureka moment when I remembered 
 Currently my Sipura box, now at least fourteen or fifteen years old, sits quite happily plugged into the landline and router in debug mode set to verbose and logs to an app listening on the standard syslog port on a Synology NAS.  The app does all the work or parsing the log events and looking up the inbound number in an address book so a known caller's name is displayed instead.
 
 I have a few implementations that use for picking up a new language or framework.  The legacy version is a simple Java application [simple-callerid](https://github.com/eharrow/callerid/tree/master/java-callerid).  In addition I have an Apache Camel (therefore Spring) version that is really compact and neat but dies on my Synology NAS and has about a 2 minute start up time.  Currently I am working on a javascript version for a Node.js runtime.
+
+Notes on [exporting a mac address book](https://blog.ewanharrow.com/2019/05/11/export-mac-addressbook/).
